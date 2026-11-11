@@ -81,6 +81,7 @@ public class MainActivity extends Activity {
         input.setSingleLine(true);
         input.setFocusable(true);
         input.setFocusableInTouchMode(true);
+        input.setShowSoftInputOnFocus(true);
         input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         input.setImeOptions(EditorInfo.IME_ACTION_SEND);
         input.setOnClickListener(v -> showKeyboard());
@@ -127,7 +128,7 @@ public class MainActivity extends Activity {
         input.requestFocus();
         input.postDelayed(() -> {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+            if (imm != null) imm.showSoftInput(input, InputMethodManager.SHOW_FORCED);
         }, 150);
     }
 
