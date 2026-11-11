@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070b18">
+<meta name="description" content="АХИ AI — личный ИИ-помощник на русском языке.">
+<title>АХИ AI</title>
+<style>
+:root{color-scheme:dark;--bg:#070b18;--panel:#0d1428;--line:#20345d;--blue:#3988ff;--cyan:#51d8ff;--text:#edf5ff;--muted:#91a5c5}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#173c78 0,transparent 55%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100dvh}
+.app{max-width:850px;margin:auto;min-height:100dvh;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom)}
+header{display:flex;align-items:center;justify-content:space-between;padding:17px 2px;border-bottom:1px solid #1c2c4c}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:43px;height:43px;border-radius:15px;background:linear-gradient(145deg,#1558bb,#38caff);display:grid;place-items:center;font-weight:900;font-size:22px;box-shadow:0 0 28px #258cff66}.brand h1{font-size:19px;margin:0;letter-spacing:.4px}.brand small{display:block;color:var(--muted);font-size:11px}
+.iconbtn{border:1px solid var(--line);background:#101a30;color:var(--text);border-radius:13px;padding:10px 12px;font-size:18px}
+.hero{text-align:center;padding:38px 12px 20px}.orb{width:88px;height:88px;border-radius:50%;margin:0 auto 16px;background:radial-gradient(circle at 35% 30%,#a4f0ff,#329aff 40%,#142e75 72%);box-shadow:0 0 25px #319bff88,0 0 65px #1a62db55;position:relative}.orb:after{content:"";position:absolute;inset:12px;border:1px solid #ffffff55;border-radius:50%}.hero h2{font-size:25px;margin:0 0 7px}.hero p{color:var(--muted);margin:0;font-size:14px}
+.suggestions{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:18px}.chip{background:#0d1930;border:1px solid #23416f;color:#b9d8ff;border-radius:22px;padding:8px 12px;font-size:12px}
+#chat{flex:1;display:flex;flex-direction:column;gap:13px;padding:16px 0 22px;overflow:auto}.msg{max-width:88%;padding:12px 15px;border-radius:18px;white-space:pre-wrap;overflow-wrap:anywhere}.msg.ai{align-self:flex-start;background:linear-gradient(145deg,#101d36,#0c1528);border:1px solid #20375e;border-bottom-left-radius:5px}.msg.user{align-self:flex-end;background:linear-gradient(145deg,#174b91,#123568);border:1px solid #2865ad;border-bottom-right-radius:5px}
+.composer{position:sticky;bottom:0;padding:12px 0 calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,#070b18 18%)}.inputbox{display:flex;align-items:flex-end;gap:8px;background:#0d1528;border:1px solid #29436e;border-radius:19px;padding:8px;box-shadow:0 0 25px #1766cc22}.inputbox textarea{flex:1;resize:none;max-height:140px;min-height:42px;border:0;outline:0;background:transparent;color:var(--text);font:inherit;padding:9px}.send{border:0;border-radius:14px;background:linear-gradient(135deg,#287cff,#36c5ff);color:white;font-weight:700;padding:12px 15px}.tools{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px;padding:8px 4px}.toolbtn{background:transparent;color:#a9c9f4;border:0;padding:7px;font-size:13px}
+dialog{width:min(92vw,470px);background:#0d172b;color:var(--text);border:1px solid #2a4777;border-radius:20px;padding:22px}dialog::backdrop{background:#020611bb}dialog h3{margin-top:0}dialog p{color:var(--muted);font-size:13px}dialog input{width:100%;padding:12px;border-radius:11px;border:1px solid #2b4775;background:#070e1d;color:white;margin:8px 0 12px}.actions{display:flex;gap:9px;justify-content:flex-end}.actions button{padding:10px 14px;border-radius:11px;border:1px solid #2b4775;background:#142440;color:white}.actions .primary{background:#287cff;border:0}.note{color:#8095b8;text-align:center;font-size:11px;padding:0 0 10px}
+@media(min-width:650px){.hero{padding-top:50px}.msg{max-width:75%}}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="brand"><div class="logo">А</div><div><h1>АХИ AI</h1><small>ТВОЙ ЛИЧНЫЙ ИИ-ПОМОЩНИК</small></div></div><button class="iconbtn" id="settings" aria-label="Настройки">⚙</button></header>
+<section class="hero" id="welcome"><div class="orb"></div><h2>Привет, я АХИ</h2><p>Готов помочь. Напиши сообщение или нажми на микрофон.</p><div class="suggestions"><button class="chip">Объясни простыми словами</button><button class="chip">Помоги с идеей</button><button class="chip">Расскажи интересное</button></div></section>
+<main id="chat" aria-live="polite"></main>
+<section class="composer"><div class="inputbox"><button class="iconbtn" id="mic" title="Голосовой ввод">🎙</button><textarea id="prompt" rows="1" placeholder="Напиши АХИ..."></textarea><button class="send" id="send">➤</button></div><div class="tools"><span id="status">История хранится на этом устройстве</span><div><button class="toolbtn" id="speak">🔊 Озвучить</button><button class="toolbtn" id="clear">Очистить</button></div></div><div class="note">Для ответов ИИ один раз добавь свой API-ключ в настройках. Ключ остаётся только в браузере этого устройства.</div></section>
+</div>
+<dialog id="settingsDialog"><h3>Настройки АХИ AI</h3><p>Вставь свой ключ OpenRouter. Он сохранится только в локальном хранилище этого браузера и не попадёт в репозиторий сайта.</p><input id="apiKey" type="password" autocomplete="off" placeholder="sk-or-v1-…"><p>Модель по умолчанию: openrouter/free. Не отправляй ключ в чат и никому его не показывай.</p><div class="actions"><button id="closeSettings">Закрыть</button><button class="primary" id="saveKey">Сохранить ключ</button></div></dialog>
+<script>
+const $=s=>document.querySelector(s), chat=$('#chat'), promptBox=$('#prompt'), status=$('#status');
+let history=JSON.parse(localStorage.getItem('ahi_history')||'[]');
+function save(){localStorage.setItem('ahi_history',JSON.stringify(history))}
+function bubble(role,text){const d=document.createElement('div');d.className='msg '+role;d.textContent=text;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
+function render(){chat.innerHTML='';history.forEach(m=>bubble(m.role==='user'?'user':'ai',m.content));$('#welcome').style.display=history.length?'none':''}
+render();
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{promptBox.value=b.textContent;promptBox.focus()});
+$('#settings').onclick=()=>{$('#apiKey').value=localStorage.getItem('ahi_key')||'';$('#settingsDialog').showModal()};
+$('#closeSettings').onclick=()=>$('#settingsDialog').close();
+$('#saveKey').onclick=()=>{const k=$('#apiKey').value.trim();if(k)localStorage.setItem('ahi_key',k);else localStorage.removeItem('ahi_key');$('#settingsDialog').close();status.textContent=k?'Ключ сохранён на этом устройстве':'Ключ не задан'};
+$('#clear').onclick=()=>{if(confirm('Удалить историю переписки на этом устройстве?')){history=[];save();render()}};
+async function send(){const text=promptBox.value.trim();if(!text)return;const key=localStorage.getItem('ahi_key');if(!key){bubble('user',text);history.push({role:'user',content:text});save();promptBox.value='';$('#welcome').style.display='none';status.textContent='Добавь API-ключ в ⚙, чтобы получать ответы ИИ';return}
+promptBox.value='';$('#welcome').style.display='none';history.push({role:'user',content:text});bubble('user',text);save();const wait=document.createElement('div');wait.className='msg ai';wait.textContent='АХИ думает…';chat.appendChild(wait);status.textContent='Подключаюсь к ИИ…';
+try{const messages=[{role:'system',content:'Ты АХИ AI — дружелюбный, умный помощник. Всегда отвечай на русском языке, если пользователь явно не попросил другой язык. Отвечай естественно, по делу и без шаблонных фраз.'},...history.slice(-20)];
+const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify({model:'openrouter/free',messages})});
+const data=await r.json();if(!r.ok)throw new Error(data.error?.message||'Ошибка API: '+r.status);
+const answer=data.choices?.[0]?.message?.content||'Не удалось получить ответ.';wait.remove();history.push({role:'assistant',content:answer});save();bubble('ai',answer);status.textContent='АХИ на связи';}
+catch(e){wait.remove();bubble('ai','Не получилось получить ответ: '+e.message+'\nПроверь ключ и интернет в настройках.');history.pop();save();status.textContent='Ошибка подключения'}}
+$('#send').onclick=send;promptBox.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+$('#mic').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){status.textContent='Голосовой ввод не поддерживается этим браузером';return}const rec=new SR();rec.lang='ru-RU';rec.onresult=e=>{promptBox.value=e.results[0][0].transcript;promptBox.focus()};rec.onerror=()=>status.textContent='Не удалось распознать речь';rec.start();status.textContent='Слушаю…'};
+$('#speak').onclick=()=>{const last=[...history].reverse().find(m=>m.role==='assistant');if(!last){status.textContent='Пока нечего озвучивать';return}if(!('speechSynthesis'in window)){status.textContent='Озвучивание не поддерживается';return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(last.content);u.lang='ru-RU';speechSynthesis.speak(u)};
+</script>
+</body>
+</html>
