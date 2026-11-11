@@ -67,7 +67,15 @@ public class MainActivity extends Activity {
             Toast.makeText(this, "Не удалось открыть защищённое хранилище", Toast.LENGTH_LONG).show();
         }
         tts = new TextToSpeech(this, result -> {
-            if (result == TextToSpeech.SUCCESS) tts.setLanguage(new Locale("ru", "RU"));
+            if (result == TextToSpeech.SUCCESS) {
+                tts.setLanguage(new Locale("ru", "RU"));
+                String savedVoice = prefs.getString("tts_voice", "");
+                if (!savedVoice.isEmpty() && tts.getVoices() != null) {
+                    for (android.speech.tts.Voice voice : tts.getVoices()) {
+                        if (savedVoice.equals(voice.getName())) { tts.setVoice(voice); break; }
+                    }
+                }
+            }
         });
         buildUi();
         restoreMessages();
@@ -95,7 +103,7 @@ public class MainActivity extends Activity {
         settings.setText("⚙");
         header.addView(settings, new LinearLayout.LayoutParams(56, 48));
         root.addView(header);
-        settings.setOnClickListener(v -> showKeyDialog());
+        settings.setOnClickListener(v -> showSettingsMenu());
 
         status = text("Твой голосовой помощник", 13, blue);
         status.setGravity(Gravity.CENTER);
@@ -150,6 +158,88 @@ public class MainActivity extends Activity {
         sendButton.setOnClickListener(v -> sendMessage());
         input.setOnEditorActionListener((v, action, event) -> { sendMessage(); return true; });
         addMessage("АХИ", "Я на связи, брат. Нажми ⚙ и добавь свой ключ OpenRouter, затем можем общаться.", false, false);
+    }
+
+    private void showSettingsMenu() {
+        LinearLayout menu = new LinearLayout(this);
+        menu.setOrientation(LinearLayout.VERTICAL);
+        menu.setPadding(24, 12, 24, 4);
+
+        TextView intro = text("Управляй своим помощником АХИ", 14, blue);
+        intro.setPadding(4, 4, 4, 14);
+        menu.addView(intro);
+
+        Button key = new Button(this);
+        key.setText("🔑  Ключ и подключение OpenRouter");
+        menu.addView(key, new LinearLayout.LayoutParams(-1, 54));
+
+        Button voice = new Button(this);
+        voice.setText("🎙  Голос АХИ");
+        menu.addView(voice, new LinearLayout.LayoutParams(-1, 54));
+
+        Button memory = new Button(this);
+        memory.setText("🧹  Очистить историю переписки");
+        menu.addView(memory, new LinearLayout.LayoutParams(-1, 54));
+
+        Button about = new Button(this);
+        about.setText("ℹ  О приложении");
+        menu.addView(about, new LinearLayout.LayoutParams(-1, 54));
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+            .setTitle("Настройки АХИ AI")
+            .setView(menu)
+            .setNegativeButton("Закрыть", null)
+            .create();
+        key.setOnClickListener(v -> { dialog.dismiss(); showKeyDialog(); });
+        voice.setOnClickListener(v -> { dialog.dismiss(); showVoiceDialog(); });
+        memory.setOnClickListener(v -> new AlertDialog.Builder(this)
+            .setTitle("Очистить историю?")
+            .setMessage("Все сохранённые сообщения будут удалены с этого телефона.")
+            .setNegativeButton("Отмена", null)
+            .setPositiveButton("Очистить", (d, w) -> {
+                prefs.edit().remove("history").apply();
+                messages.removeAllViews();
+                addMessage("АХИ", "История очищена. Я готов начать разговор заново.", false, false);
+            }).show());
+        about.setOnClickListener(v -> new AlertDialog.Builder(this)
+            .setTitle("АХИ AI")
+            .setMessage("Голосовой AI-помощник. Ответы нейросети подключаются через OpenRouter. История хранится на телефоне.")
+            .setPositiveButton("Понятно", null).show());
+        dialog.show();
+    }
+
+    private void showVoiceDialog() {
+        if (tts == null || tts.getVoices() == null) {
+            Toast.makeText(this, "Список голосов ещё загружается. Попробуй чуть позже.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        ArrayList<android.speech.tts.Voice> russianVoices = new ArrayList<>();
+        ArrayList<String> labels = new ArrayList<>();
+        for (android.speech.tts.Voice voice : tts.getVoices()) {
+            if (voice.getLocale() != null && "ru".equals(voice.getLocale().getLanguage())) {
+                russianVoices.add(voice);
+                labels.add(voice.getName() + (voice.isNetworkConnectionRequired() ? " · онлайн" : " · офлайн"));
+            }
+        }
+        if (russianVoices.isEmpty()) {
+            new AlertDialog.Builder(this).setTitle("Голоса АХИ")
+                .setMessage("На телефоне пока нет установленных русских голосов. Их можно добавить в системных настройках преобразования текста в речь.")
+                .setPositiveButton("Понятно", null).show();
+            return;
+        }
+        String[] choices = labels.toArray(new String[0]);
+        new AlertDialog.Builder(this).setTitle("Выбери русский голос АХИ")
+            .setItems(choices, (d, which) -> {
+                android.speech.tts.Voice selected = russianVoices.get(which);
+                int result = tts.setVoice(selected);
+                if (result == TextToSpeech.SUCCESS) {
+                    prefs.edit().putString("tts_voice", selected.getName()).apply();
+                    Toast.makeText(this, "Голос сохранён", Toast.LENGTH_SHORT).show();
+                    tts.speak("Привет, я АХИ. Теперь этот голос выбран.", TextToSpeech.QUEUE_FLUSH, null, "ahiai_voice_test");
+                } else {
+                    Toast.makeText(this, "Не удалось выбрать этот голос", Toast.LENGTH_LONG).show();
+                }
+            }).setNegativeButton("Отмена", null).show();
     }
 
     private void showKeyDialog() {
