@@ -343,7 +343,7 @@ public class MainActivity extends Activity {
             JSONArray chat = new JSONArray();
             chat.put(new JSONObject().put("role", "system").put("content",
                 "Ты АХИ AI — полезный русскоязычный помощник. Всегда отвечай строго по-русски, естественно, конкретно и по существу. Сначала выполни просьбу или ответь на вопрос пользователя. Не отвечай фразами «что хотел спросить?», «чем могу помочь?» или другими пустыми встречными вопросами, если пользователь уже задал вопрос или дал задачу. Не переспрашивай, если смысл понятен; если действительно не хватает важной информации, задай один короткий уточняющий вопрос. Не повторяй приветствие в каждом сообщении. Не выдумывай факты и честно говори, если чего-то не знаешь. Тон дружелюбный и спокойный."));
-            String[] rows = prefs.getString("history", "").split("\\n");
+            String[] rows = prefs.getString("history", "").split("\n");
             int first = Math.max(0, rows.length - 12);
             for (int i = first; i < rows.length; i++) {
                 String row = rows[i];
@@ -395,11 +395,11 @@ public class MainActivity extends Activity {
 
     private void saveLine(String line) {
         String old = prefs.getString("history", "");
-        String updated = old + line + "\\n";
-        String[] rows = updated.split("\\n");
+        String updated = old + line + "\n";
+        String[] rows = updated.split("\n");
         StringBuilder last = new StringBuilder();
         int start = Math.max(0, rows.length - 80);
-        for (int i = start; i < rows.length; i++) if (!rows[i].isEmpty()) last.append(rows[i]).append("\\n");
+        for (int i = start; i < rows.length; i++) if (!rows[i].isEmpty()) last.append(rows[i]).append("\n");
         prefs.edit().putString("history", last.toString()).apply();
     }
 
@@ -407,7 +407,7 @@ public class MainActivity extends Activity {
         String history = prefs.getString("history", "");
         if (history.isEmpty()) return;
         messages.removeAllViews();
-        for (String row : history.split("\\n")) {
+        for (String row : history.split("\n")) {
             if (row.startsWith("Ты: ")) addMessage("ТЫ", row.substring(4), true, false);
             else if (row.startsWith("АХИ: ")) addMessage("АХИ", row.substring(5), false, false);
         }
