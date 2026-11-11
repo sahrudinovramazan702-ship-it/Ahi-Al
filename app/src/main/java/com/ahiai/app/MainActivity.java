@@ -12,6 +12,7 @@ import android.graphics.Typeface;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.EditorInfo;
 import android.content.Context;
 import android.widget.*;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         getWindow().setStatusBarColor(bg);
         getWindow().setNavigationBarColor(bg);
+        getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE | android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         prefs = getSharedPreferences("ahiai_memory", MODE_PRIVATE);
         tts = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) tts.setLanguage(new Locale("ru", "RU"));
@@ -77,6 +79,11 @@ public class MainActivity extends Activity {
         bottom.setOrientation(LinearLayout.HORIZONTAL);
         input = new EditText(this);
         input.setSingleLine(true);
+        input.setFocusable(true);
+        input.setFocusableInTouchMode(true);
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        input.setImeOptions(EditorInfo.IME_ACTION_SEND);
+        input.setOnClickListener(v -> showKeyboard());
         input.setTextColor(white);
         input.setHintTextColor(Color.GRAY);
         input.setHint("Напиши сообщение...");
@@ -84,6 +91,7 @@ public class MainActivity extends Activity {
         input.setPadding(14, 8, 14, 8);
         input.setBackgroundColor(panel);
         bottom.addView(input, new LinearLayout.LayoutParams(0, 52, 1));
+        input.setOnFocusChangeListener((v, hasFocus) -> { if (hasFocus) showKeyboard(); });
 
         Button mic = new Button(this); mic.setText("🎙");
         bottom.addView(mic, new LinearLayout.LayoutParams(54, 52));
@@ -113,6 +121,14 @@ public class MainActivity extends Activity {
         messages.addView(bubble, lp);
         scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN));
         if (speak && tts != null) tts.speak(body, TextToSpeech.QUEUE_FLUSH, null, "ahiai_reply");
+    }
+
+    private void showKeyboard() {
+        input.requestFocus();
+        input.postDelayed(() -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+        }, 150);
     }
 
     private void sendMessage() {
